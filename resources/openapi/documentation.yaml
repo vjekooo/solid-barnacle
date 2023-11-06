@@ -1,0 +1,8 @@
+openapi: "3.0.3"
+info:
+  title: "project23 API"
+  description: "project23 API"
+  version: "1.0.0"
+servers:
+- url: ""
+paths: {}
