@@ -1,5 +1,6 @@
 package com.example.plugins
 
+import com.example.routing.authenticationRoutes
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
@@ -23,4 +24,5 @@ fun Application.configureRouting() {
 			extensions("html", "htm")
 		}
 	}
+	authenticationRoutes()
 }

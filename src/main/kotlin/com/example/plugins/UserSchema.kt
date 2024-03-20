@@ -1,5 +1,6 @@
 package com.example.plugins
 
+import com.example.routing.UserCredentials
 import kotlinx.coroutines.*
 import kotlinx.serialization.Serializable
 import java.sql.Connection
@@ -8,14 +9,8 @@ import java.sql.Statement
 import org.mindrot.jbcrypt.BCrypt
 
 object Hasher {
-	/**
-	 * Check if the password matches the User's password
-	 */
-	fun checkPassword(attempt: String, user: User) = if (BCrypt.checkpw(attempt, user.password)) Unit
+	fun checkPassword(attempt: String, savedPassword: String) = if (BCrypt.checkpw(attempt, savedPassword)) true
 		else throw Exception("Wrong Password")
-	/**
-	 * Returns the hashed version of the supplied password
-	 */
 	fun hashPassword(password: String): String = BCrypt.hashpw(password, BCrypt.gensalt())
 }
 
@@ -27,6 +22,7 @@ class UserService(private val connection: Connection) {
 			"CREATE TABLE IF NOT EXISTS USERS (ID SERIAL PRIMARY KEY, name VARCHAR(255), lastname VARCHAR(255), email VARCHAR(255), password VARCHAR(255));"
 		private const val SELECT_CITY_BY_ID = "SELECT name FROM users WHERE id = ?"
 		private const val SELECT_USER_BY_EMAIL = "SELECT name, lastname, email FROM users WHERE email = ?"
+		private const val SELECT_USER_BY_CREDENTIALS = "SELECT email, password FROM users WHERE email = ?"
 		private const val INSERT_USER = "INSERT INTO users (name, lastname, email, password) VALUES (?, ?, ?, ?)"
 		private const val UPDATE_CITY = "UPDATE users SET name = ?, lastname = ?, email = ? WHERE id = ?"
 		private const val DELETE_CITY = "DELETE FROM users WHERE id = ?"
@@ -91,6 +87,22 @@ class UserService(private val connection: Connection) {
 			return@withContext User(name, lastname, email, password = "")
 		} else {
 			throw Exception("Record not found")
+		}
+	}
+
+	suspend fun validateUser(credentials: UserCredentials) = withContext(Dispatchers.IO) {
+		val statement = connection.prepareStatement(SELECT_USER_BY_CREDENTIALS, Statement.RETURN_GENERATED_KEYS)
+
+		statement.setString(1, credentials.email)
+		val result = statement.executeQuery()
+
+		if (result.next()) {
+			Hasher.checkPassword(credentials.password, result.getString("password"))
+
+			// Do stuff
+
+		} else {
+			throw Exception("Invalid email of password")
 		}
 	}
 
