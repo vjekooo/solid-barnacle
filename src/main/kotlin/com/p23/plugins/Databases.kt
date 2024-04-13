@@ -1,5 +1,6 @@
-package com.example.plugins
+package com.p23.plugins
 
+import com.p23.repository.UserRepository
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -10,38 +11,38 @@ import kotlinx.coroutines.*
 
 fun Application.configureDatabases() {
 	val dbConnection: Connection = connectToPostgres(embedded = false)
-	val userService = UserService(dbConnection)
-	routing {
-		// Create city
-		post("/users") {
-			val user = call.receive<User>()
-			val id = userService.create(user)
-			call.respond(HttpStatusCode.Created, id)
-		}
-		// Read city
-		get("/users/{id}") {
-			val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
-			try {
-				val city = userService.readById(id)
-				call.respond(HttpStatusCode.OK, city)
-			} catch (e: Exception) {
-				call.respond(HttpStatusCode.NotFound)
-			}
-		}
-		// Update city
-		put("/users/{id}") {
-			val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
-			val user = call.receive<User>()
-			userService.update(id, user)
-			call.respond(HttpStatusCode.OK)
-		}
-		// Delete city
-		delete("/users/{id}") {
-			val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
-			userService.delete(id)
-			call.respond(HttpStatusCode.OK)
-		}
-	}
+	val userService = UserRepository(dbConnection)
+//	routing {
+//		// Create city
+//		post("/users") {
+//			val user = call.receive<User>()
+//			val id = userService.create(user)
+//			call.respond(HttpStatusCode.Created, id)
+//		}
+//		// Read city
+//		get("/users/{id}") {
+//			val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
+//			try {
+//				val city = userService.readById(id)
+//				call.respond(HttpStatusCode.OK, city)
+//			} catch (e: Exception) {
+//				call.respond(HttpStatusCode.NotFound)
+//			}
+//		}
+//		// Update city
+//		put("/users/{id}") {
+//			val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
+//			val user = call.receive<User>()
+//			userService.update(id, user)
+//			call.respond(HttpStatusCode.OK)
+//		}
+//		// Delete city
+//		delete("/users/{id}") {
+//			val id = call.parameters["id"]?.toInt() ?: throw IllegalArgumentException("Invalid ID")
+//			userService.delete(id)
+//			call.respond(HttpStatusCode.OK)
+//		}
+//	}
 }
 
 /**

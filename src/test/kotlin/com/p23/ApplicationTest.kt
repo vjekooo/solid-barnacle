@@ -1,6 +1,6 @@
-package com.example
+package com.p23
 
-import com.example.plugins.*
+import com.p23.routing.configureRouting
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*

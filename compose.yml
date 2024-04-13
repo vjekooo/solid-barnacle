@@ -1,0 +1,39 @@
+version: "3.5"
+networks:
+  default:
+    name: project23-dev
+volumes:
+  db:
+
+services:
+  db: &db-template
+    image: postgres:16
+    volumes:
+      - db:/var/lib/postgresql/data/
+#      - ./src/main/docker/db-backup/:/backup/
+#      - ./src/main/docker/db-init/create-db.sql:/docker-entrypoint-initdb.d/create-db.sql
+    environment:
+      - POSTGRES_USER=manager
+      - POSTGRES_PASSWORD=manager123
+      - PGPASSWORD=manager123
+      - POSTGRES_DB=project23
+    ports:
+      - 5432:5432
+
+  restore-db:
+    <<: *db-template
+    ports: []
+    command:
+      - /bin/bash
+      - -c
+      - |
+        cd /backup
+        zcat project23.sql.gz | psql -h db -U manager project23
+    profiles: ["db-restore"]
+
+  backup-mdd:
+    <<: *db-template
+    ports: []
+    environment: []
+    command: "/backup/dev-db.sh"
+    profiles: ["db-backup"]
